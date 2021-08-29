@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase": "^9.0.0",
+    "morgan": "^1.10.0",
+    "puppeteer": "^10.2.0"
+  }
+}
