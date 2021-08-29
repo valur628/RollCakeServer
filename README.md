@@ -9,17 +9,18 @@
 
 |       | Hangle Name       | in DB Name        | Type          | Key |
 |-------|-------------------|-------------------|---------------|-----|
-| 1     | 소프트웨어 ID     | DB_SoftID         | Text string   | P.K |
-| 2     | 소프트웨어 명     | DB_SoftName       | Text string   |     |
-| 3     | 개발사 명         | DB_DevName        | Text string   |     |
-| 4     | 갱신 시간         | DB_UpdateTime     | Date and time |     |
-| 5     | 통화              | DB_Currency       | Text string   |     |
-| 6     | 정식 가격         | DB_RegCost        | Double        |     |
-| 7     | 할인 가격         | DB_DisCost        | Double        |     |
-| 8     | 할인율            | DB_DisRate        | Double        |     |
-| 9     | 상품 주소         | DB_ProductAddress | Text string   |     |
-| 10    | 플랫폼            | DB_Platform       | Text string   |     |
-| 11    | 큰 사진           | DB_BigPicture     | Image         |     |
-| 12    | 작은 사진         | DB_SmallPicture   | Image         |     |
+| 1     | 소프트웨어 인덱스 | DB_SoftIndex      | Text string   | P.K |
+| 2     | 소프트웨어 ID     | DB_SoftID         | Text string   |     |
+| 3     | 소프트웨어 명     | DB_SoftName       | Text string   |     |
+| 4     | 개발사 명         | DB_DevName        | Text string   |     |
+| 5     | 갱신 시간         | DB_UpdateTime     | Date and time |     |
+| 6     | 통화              | DB_Currency       | Text string   |     |
+| 7     | 정식 가격         | DB_RegCost        | Double        |     |
+| 8     | 할인 가격         | DB_DisCost        | Double        |     |
+| 9     | 할인율            | DB_DisRate        | Double        |     |
+| 10     | 상품 주소         | DB_ProductAddress | Text string   |     |
+| 11    | 플랫폼            | DB_Platform       | Text string   |     |
+| 12    | 큰 사진           | DB_BigPicture     | Image         |     |
+| 13    | 작은 사진         | DB_SmallPicture   | Image         |     |
 - DB_SoftID 규칙은 DB상의 소프트웨어 명칭을 그대로 가져온 것을 사용함([플랫폼 이름]_[소프트웨어 주소 ID])
 - 스팀은 주소 ID 대신 DB상 ID 사용
