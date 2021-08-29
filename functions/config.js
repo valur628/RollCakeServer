@@ -1,10 +1,10 @@
 const firebaseConfig = {
-    apiKey: "AIzaSyAT5sg1cK6laO8e-WVcZesI61kMQBeKIs4",
-    authDomain: "swhotdealfb.firebaseapp.com",
-    projectId: "swhotdealfb",
-    storageBucket: "swhotdealfb.appspot.com",
-    messagingSenderId: "727470924385",
-    appId: "1:727470924385:web:a611ff4f445bc9d09e0020",
-    measurementId: "G-N0K7M10H2Q"
+  apiKey: "AIzaSyCULhjNY-Jc7H3FucLkXZqN3kR7b3izdFg",
+  authDomain: "rollcakeserver.firebaseapp.com",
+  projectId: "rollcakeserver",
+  storageBucket: "rollcakeserver.appspot.com",
+  messagingSenderId: "1091059315554",
+  appId: "1:1091059315554:web:3cf9d1f0e74c96371af23b",
+  measurementId: "G-J881LLT18D"
   }
 module.exports = firebaseConfig;

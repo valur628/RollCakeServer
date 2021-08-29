@@ -1,4 +1,3 @@
-const firebase = require("firebase");
 require("firebase/firestore");
 const firestoreService = require('firestore-export-import');
 const firebaseConfig = require('./config.js');
