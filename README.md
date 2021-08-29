@@ -9,7 +9,7 @@
 
 |       | Hangle Name       | in DB Name        | Type          | Key |
 |-------|-------------------|-------------------|---------------|-----|
-| 1     | 소프트웨어 인덱스 | DB_SoftIndex      | Text string   | P.K |
+| 1     | 소프트웨어 인덱스 | DB_SoftIndex      | Integer        | P.K |
 | 2     | 소프트웨어 ID     | DB_SoftID         | Text string   |     |
 | 3     | 소프트웨어 명     | DB_SoftName       | Text string   |     |
 | 4     | 개발사 명         | DB_DevName        | Text string   |     |
