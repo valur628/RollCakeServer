@@ -1,4 +1,4 @@
-require("firebase/firestore");
+const firebase = require("firebase/app");
 const firestoreService = require('firestore-export-import');
 const firebaseConfig = require('./config.js');
 const serviceAccount = require('./serviceAccount.json');
@@ -52,7 +52,7 @@ app.listen(hostPort, () => {
 });
 
 function jsonSplit(splitValue, lines, SplitNum, DB_Split) {
-	return(splitValue[lines].split(DB_Split[SplitNum][0])[1].toString()).split(DB_Split[SplitNum][1])[0].toString();
+	return((splitValue[lines].split(DB_Split[SplitNum][0])[1].toString()).split(DB_Split[SplitNum][1])[0].toString());
 }
 
 async function humblebundleWeb(pageCount) {
@@ -75,41 +75,42 @@ async function humblebundleWeb(pageCount) {
 
 function humblebundleDB(splitValue, lines) {
 	let FB_object = {
-		DB_LoadNumber: 0,
-		DB_SWName: "Not SW Name",
-		DB_DevName: "Not Dev Name",
-		DB_DisPeriod: "0",
-		DB_Currency: "USD",
-		DB_Cost: 0,
-		DB_DisPrice: -1,
+		DB_SoftIndex: 0,
+		DB_SoftID: "Non-Platform_Non-ID",
+		DB_SoftName: "Non-SoftName",
+		DB_DevName: "Non-DevName",
+		DB_UpdateTime: new Date('2000/1/20/17:24:50:00'),
+		DB_Currency: "Non-Currency",
+		DB_RegCost: 0,
+		DB_DisCost: -1,
 		DB_DisRate: 0,
-		DB_PlatAddress: "Not Address",
-		DB_PlatName: "Not Site",
-		DB_RepPicture: "Not Main Picture",
-		DB_OthPicture: "Not Sub Picture"
+		DB_ProductAddress: "Non-Address",
+		DB_Platform: "Non-Platform",
+		DB_BigPicture: "Non-BigPicture",
+		DB_SmallPicture: "Non-SmallPicture"
 	}
-	FB_object.DB_Cost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 4, HB_Split)));
-	FB_object.DB_DisPrice = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 5, HB_Split)));
-	if((FB_object.DB_DisPrice == FB_object.DB_Cost) && (FB_object.DB_Cost != 0)) {
-		FB_object.DB_DisPrice = -1;
+	FB_object.DB_RegCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 4, HB_Split)));
+	FB_object.DB_DisCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 5, HB_Split)));
+	if((FB_object.DB_DisCost == FB_object.DB_RegCost) && (FB_object.DB_RegCost != 0)) {
+		FB_object.DB_DisCost = -1;
 		HB_sublineTotal++;
 		return "0";
 	}
-	FB_object.DB_LoadNumber = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal);
+	FB_object.DB_SoftIndex = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal);
 	nameTemp = jsonSplit(splitValue, lines, 0, HB_Split);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
-	FB_object.DB_SWName = nameTemp.replace(/\\u/g, "");
+	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
 	FB_object.DB_DevName = "Not Dev";
-	FB_object.DB_DisPeriod = 20000101;
+	FB_object.DB_UpdateTime = 20000101;
 	FB_object.DB_Currency = jsonSplit(splitValue, lines, 3, HB_Split);
-	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisPrice) / parseInt(FB_object.DB_Cost)) * 100) * 10) / 10)));
-	FB_object.DB_PlatAddress = "https://www.humblebundle.com/store/" + jsonSplit(splitValue, lines, 7, HB_Split);
-	FB_object.DB_PlatName = "HumbleBundle";
+	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
+	FB_object.DB_ProductAddress = "https://www.humblebundle.com/store/" + jsonSplit(splitValue, lines, 7, HB_Split);
+	FB_object.DB_Platform = "HumbleBundle";
 	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 9, HB_Split) + '.jpg';
-	FB_object.DB_RepPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 10, HB_Split) + '.jpg';
-	FB_object.DB_OthPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	return JSON.stringify(FB_object, null, 5);
 }
 
@@ -137,46 +138,46 @@ async function steamWeb(pageCount) {
 
 function steamDB(splitValue, lines) {
 	let FB_object = {
-		DB_LoadNumber: 0,
-		DB_SWName: "Not SW Name",
-		DB_DevName: "Not Dev Name",
-		DB_DisPeriod: "0",
-		DB_Currency: "KRW",
-		DB_Cost: 0,
-		DB_DisPrice: -1,
+		DB_SoftIndex: 0,
+		DB_SoftID: "Non-Platform_Non-ID",
+		DB_SoftName: "Non-SoftName",
+		DB_DevName: "Non-DevName",
+		DB_UpdateTime: new Date('2000/1/20/17:24:50:00'),
+		DB_Currency: "Non-Currency",
+		DB_RegCost: 0,
+		DB_DisCost: -1,
 		DB_DisRate: 0,
-		DB_PlatAddress: "Not Address",
-		DB_PlatName: "Not Site",
-		DB_RepPicture: "Not Main Picture",
-		DB_OthPicture: "Not Sub Picture"
+		DB_ProductAddress: "Non-Address",
+		DB_Platform: "Non-Platform",
+		DB_BigPicture: "Non-BigPicture",
+		DB_SmallPicture: "Non-SmallPicture"
 	}
 	try {
 		priceTemp = jsonSplit(splitValue, lines, 4, S_Split);;
-		FB_object.DB_Cost = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
+		FB_object.DB_RegCost = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
 	} catch(error) {}
 	try {
 		priceTemp = jsonSplit(splitValue, lines, 5, S_Split);;
-		FB_object.DB_DisPrice = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
+		FB_object.DB_DisCost = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
 	} catch(error) {
 		S_sublineTotal++;
 		return "0";
 	}
-	FB_object.DB_LoadNumber = S_lineTotal - S_sublineTotal;
+	FB_object.DB_SoftIndex = S_lineTotal - S_sublineTotal;
 	nameTemp = jsonSplit(splitValue, lines, 0, S_Split);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "");
-	FB_object.DB_SWName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
 	FB_object.DB_DevName = "Not Dev";
-	FB_object.DB_DisPeriod = 20000101;
 	FB_object.DB_Currency = "KRW";
-	FB_object.DB_DisRate = !FB_object.DB_Cost && !FB_object.DB_DisPrice ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisPrice) / parseInt(FB_object.DB_Cost)) * 100) * 10) / 10)));
-	FB_object.DB_PlatAddress = "https://store.steampowered.com/" + jsonSplit(splitValue, lines, 7, S_Split);
-	FB_object.DB_PlatName = "Steam";
+	FB_object.DB_DisRate = !FB_object.DB_RegCost && !FB_object.DB_DisCost ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
+	FB_object.DB_ProductAddress = "https://store.steampowered.com/" + jsonSplit(splitValue, lines, 7, S_Split);
+	FB_object.DB_Platform = "Steam";
 	appidTemp = jsonSplit(splitValue, lines, 9, S_Split);
 	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/capsule_231x87.jpg';
-	FB_object.DB_RepPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/header.jpg';
-	FB_object.DB_OthPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	return JSON.stringify(FB_object, null, 5);
 }
 
@@ -196,7 +197,7 @@ async function scrapingMain() {
 			S_dbTemp = steamDB(S_splitValue, j, S_pageNum);
 			(S_lineTotal != (S_pageNum * steamRepeat) - 1) && (S_dbTemp != "0") ? fileOutput += (S_dbTemp + ","): fileOutput += "";
 		}
-	}
+	}/*
 	let HB_splitValue = [];
 	let HB_dbTemp = '';
 	let HB_pageNum = 5;
@@ -207,7 +208,7 @@ async function scrapingMain() {
 			HB_dbTemp = humblebundleDB(HB_splitValue, j, HB_pageNum);
 			(HB_lineTotal != (HB_pageNum * humblebundleRepeat) - 1) && (HB_dbTemp != "0") ? fileOutput += (HB_dbTemp + ","): fileOutput += "";
 		}
-	}
+	}*/
 
 	console.log('크롤링 종료');
 	if(fileOutput.slice(-1) == ",") {
