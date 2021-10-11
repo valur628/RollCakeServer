@@ -1,5 +1,6 @@
 const firebase = require("firebase/app");
 const firestoreService = require('firestore-export-import');
+const firebaseAdmin = require('firebase-admin');
 const firebaseConfig = require('./config.js');
 const serviceAccount = require('./serviceAccount.json');
 const fs = require('fs');
@@ -8,6 +9,8 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const { mainModule } = require('process');
 const app = express();
+//import dbFBI from './firebaseInit.js';
+
 
 let HB_Split = [
 	['"human_name":"', '"'],
@@ -45,6 +48,11 @@ const humblebundleRepeat = 20;
 const steamRepeat = 50; //25가 기본 단위
 const hostPort = 8080;
 
+firebaseAdmin.initializeApp({
+	credential: firebaseAdmin.credential.cert(serviceAccount)
+});
+const dbFBI = firebaseAdmin.firestore();
+
 app.use(morgan('combined'));
 app.listen(hostPort, () => {
 	console.log('호스트 포트: ' + hostPort);
@@ -55,6 +63,7 @@ function jsonSplit(splitValue, lines, SplitNum, DB_Split) {
 	return((splitValue[lines].split(DB_Split[SplitNum][0])[1].toString()).split(DB_Split[SplitNum][1])[0].toString());
 }
 
+//https://www.humblebundle.com/store/api/search?sort=bestselling&filter=onsale&page=1&request=1
 async function humblebundleWeb(pageCount) {
 	let splitValue = ["abcdefgh"];
 	const HB_browser = await puppeteer.launch({
@@ -62,7 +71,7 @@ async function humblebundleWeb(pageCount) {
 	});
 	const HB_page = await HB_browser.newPage();
 	await HB_page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36');
-	await HB_page.goto('https://www.humblebundle.com/store/api/search?sort=bestselling&filter=all&genre=software&page=' + pageCount + '&request=1', {
+	await HB_page.goto('https://www.humblebundle.com/store/api/search?sort=bestselling&filter=onsale&page=' + pageCount + '&request=1', {
 		waitUntil: 'networkidle0'
 	});
 	html = await HB_page.content();
@@ -79,7 +88,7 @@ function humblebundleDB(splitValue, lines) {
 		DB_SoftID: "Non-Platform_Non-ID",
 		DB_SoftName: "Non-SoftName",
 		DB_DevName: "Non-DevName",
-		DB_UpdateTime: new Date('2000/1/20/17:24:50:00'),
+		DB_UpdateTime: new Date(),
 		DB_Currency: "Non-Currency",
 		DB_RegCost: 0,
 		DB_DisCost: -1,
@@ -101,8 +110,8 @@ function humblebundleDB(splitValue, lines) {
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
 	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
+	if(FB_object.DB_SoftName == "") return 0;
 	FB_object.DB_DevName = "Not Dev";
-	FB_object.DB_UpdateTime = 20000101;
 	FB_object.DB_Currency = jsonSplit(splitValue, lines, 3, HB_Split);
 	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	FB_object.DB_ProductAddress = "https://www.humblebundle.com/store/" + jsonSplit(splitValue, lines, 7, HB_Split);
@@ -113,7 +122,7 @@ function humblebundleDB(splitValue, lines) {
 	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	return JSON.stringify(FB_object, null, 5);
 }
-
+//https://store.steampowered.com/search/results/?query&start=0&count=50&dynamic_data=&sort_by=Reviews_DESC&specials=1&filter=topsellers&infinite=1
 async function steamWeb(pageCount) {
 	let splitValue = ["abcdefgh"];
 	const S_browser = await puppeteer.launch({
@@ -121,7 +130,7 @@ async function steamWeb(pageCount) {
 	});
 	const S_page = await S_browser.newPage();
 	await S_page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36');
-	await S_page.goto('https://store.steampowered.com/search/results/?query&start=' + pageCount * steamRepeat + '&count=' + steamRepeat + '&dynamic_data=&sort_by=_ASC&category1=994%2C996&infinite=1', {
+	await S_page.goto('https://store.steampowered.com/search/results/?query&start=' + pageCount * steamRepeat + '&count=' + steamRepeat + '&dynamic_data=&sort_by=Reviews_DESC&specials=1&filter=TopSellers&infinite=1', {
 		waitUntil: 'networkidle0'
 	});
 	html = await S_page.content();
@@ -142,7 +151,7 @@ function steamDB(splitValue, lines) {
 		DB_SoftID: "Non-Platform_Non-ID",
 		DB_SoftName: "Non-SoftName",
 		DB_DevName: "Non-DevName",
-		DB_UpdateTime: new Date('2000/1/20/17:24:50:00'),
+		DB_UpdateTime: new Date(),
 		DB_Currency: "Non-Currency",
 		DB_RegCost: 0,
 		DB_DisCost: -1,
@@ -163,11 +172,11 @@ function steamDB(splitValue, lines) {
 		S_sublineTotal++;
 		return "0";
 	}
-	FB_object.DB_SoftIndex = S_lineTotal - S_sublineTotal;
 	nameTemp = jsonSplit(splitValue, lines, 0, S_Split);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "");
 	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	if(FB_object.DB_SoftName == "") return 0;
 	FB_object.DB_DevName = "Not Dev";
 	FB_object.DB_Currency = "KRW";
 	FB_object.DB_DisRate = !FB_object.DB_RegCost && !FB_object.DB_DisCost ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
@@ -175,9 +184,14 @@ function steamDB(splitValue, lines) {
 	FB_object.DB_Platform = "Steam";
 	appidTemp = jsonSplit(splitValue, lines, 9, S_Split);
 	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/capsule_231x87.jpg';
-	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
-	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/header.jpg';
 	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/header.jpg';
+	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	appidArray = appidTemp.split('/');
+	FB_object.DB_SoftID = "steam/" + appidArray[0] + "/" + appidArray[1];
+	//서칭
+
+	FB_object.DB_SoftIndex = S_lineTotal - S_sublineTotal;
 	return JSON.stringify(FB_object, null, 5);
 }
 
@@ -185,12 +199,12 @@ async function scrapingMain() {
 	let fileOutput = '';
 	let S_splitValue = [];
 	let S_dbTemp = '';
-	let S_pageNum = parseInt(1000 / steamRepeat);
+	let S_pageNum = parseInt(3000 / steamRepeat);//횟수
 	fs.writeFile('DBresult.json', '{"ScrapingDB": [', 'utf8', function(error) {
 		console.log("데이터베이스 파일 만들기: " + error);
 	});
 	console.log('크롤링 시작...');
-	for(let i = 0; i < S_pageNum; i++) {
+	for(let i = 0; i < S_pageNum ; i++) {
 		S_splitValue = await steamWeb(i);
 		for(let j = 1; j < steamRepeat + 1; j++) {
 			S_lineTotal = (j + (i * steamRepeat) - 1);
@@ -200,7 +214,7 @@ async function scrapingMain() {
 	}/*
 	let HB_splitValue = [];
 	let HB_dbTemp = '';
-	let HB_pageNum = 5;
+	let HB_pageNum = 50;
 	for(let i = 0; i < HB_pageNum; i++) {
 		HB_splitValue = await humblebundleWeb(i);
 		for(let j = 1; j < HB_splitValue.length; j++) {
@@ -233,7 +247,39 @@ const jsonToFirestore = async(jsonName) => {
 	}
 };
 
+const jsonBackup = async(jsonName) => {
+	try {
+		console.log(jsonName + ' 다운로드 중...');
+		firestoreService.initializeApp(serviceAccount, firebaseConfig.databaseURL)
+		const { backup } =  require('firestore-export-import')
+		backup('ScrapingDB').then((data) => {
+			const  json  =  JSON.stringify(data);
+			fs.writeFile(jsonName, json, 'utf8',()=>{
+				console.log(jsonName + ' 다운로드 성공');
+		})
+	});
+	} catch(error) {
+		console.log('Firebase 다운로드 에러: ' + error);
+	}
+};
+
+const deleteEmptyMessages = async () => {
+	const postsRef = dbFBI.collection('ScrapingDB');
+	const query = postsRef.where("DB_Platform", "==", "Steam").get()
+    .then(snapshot => {   
+      snapshot.forEach(doc => {
+        console.log(doc.id, '=>', doc.data());
+        const deleteDoc = dbFBI.collection('ScrapingDB').doc(doc.id).delete();
+      });
+    })
+    .catch(err => {
+      console.log('Error getting documents', err);
+    });
+  };
+
 async function WebScraper() { //24시간 반복 기능 삭제
+	await deleteEmptyMessages();
+	await jsonBackup("DBbackup.json");
 	await scrapingMain();
 	await jsonToFirestore("DBresult.json");
 	console.log("크롤링 및 파이어베이스 업로드 종료");
