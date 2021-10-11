@@ -39,9 +39,12 @@ let S_Split = [
 	['DONT', '']
 ]
 
+let randTimeDefault = 1000;
+let randTimeAdd = 5000;
+
 let html;
-let HB_lineTotal;
-let S_lineTotal;
+let HB_lineTotal = 0;
+let S_lineTotal = 0;
 let HB_sublineTotal = 0;
 let S_sublineTotal = 0;
 const humblebundleRepeat = 20;
@@ -59,10 +62,15 @@ app.listen(hostPort, () => {
 	console.log('웹 연결...');
 });
 
-function jsonSplit(splitValue, lines, SplitNum, DB_Split) {
+function jsonSplit(splitValue, lines, SplitNum, DB_Split, lineCount) {
+	try {
 	return((splitValue[lines].split(DB_Split[SplitNum][0])[1].toString()).split(DB_Split[SplitNum][1])[0].toString());
+	} catch(error) {
+	console.log('jsonSplit 에러: ' + lineCount + ' = ' + error);
+	return "ERROR";
+	}
 }
-
+//https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22allowCountries%22:%22KR%22,%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%22,%22count%22:40,%22country%22:%22KR%22,%22effectiveDate%22:%22[,2021-10-11T14:59:59.999Z]%22,%22keywords%22:%22%22,%22locale%22:%22ko%22,%22onSale%22:true,%22sortBy%22:%22currentPrice%22,%22sortDir%22:%22ASC%22,%22start%22:0,%22tag%22:%22%22,%22withPrice%22:true%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22f45c217481a66dd17324fbb288509bac7a2d81762e72518cb9d448a0aec43350%22%7D%7D
 //https://www.humblebundle.com/store/api/search?sort=bestselling&filter=onsale&page=1&request=1
 async function humblebundleWeb(pageCount) {
 	let splitValue = ["abcdefgh"];
@@ -75,7 +83,7 @@ async function humblebundleWeb(pageCount) {
 		waitUntil: 'networkidle0'
 	});
 	html = await HB_page.content();
-	await HB_page.waitForTimeout(500 + (Math.floor(Math.random() * 1500)));
+	await HB_page.waitForTimeout(randTimeDefault + (Math.floor(Math.random() * randTimeAdd)));
 	splitValue = html.split('standard_carousel_image":"');
 	await HB_page.close();
 	await HB_browser.close();
@@ -83,6 +91,7 @@ async function humblebundleWeb(pageCount) {
 }
 
 function humblebundleDB(splitValue, lines) {
+	nowLineCount = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal);
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -98,28 +107,37 @@ function humblebundleDB(splitValue, lines) {
 		DB_BigPicture: "Non-BigPicture",
 		DB_SmallPicture: "Non-SmallPicture"
 	}
-	FB_object.DB_RegCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 4, HB_Split)));
-	FB_object.DB_DisCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 5, HB_Split)));
+	FB_object.DB_Currency = jsonSplit(splitValue, lines, 3, HB_Split, nowLineCount);
+	FB_object.DB_RegCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 4, HB_Split, nowLineCount)));
+	FB_object.DB_DisCost = parseInt(100 * parseFloat(jsonSplit(splitValue, lines, 5, HB_Split, nowLineCount)));
 	if((FB_object.DB_DisCost == FB_object.DB_RegCost) && (FB_object.DB_RegCost != 0)) {
 		FB_object.DB_DisCost = -1;
 		HB_sublineTotal++;
 		return "0";
 	}
+	if(FB_object.DB_Currency == "ERROR") {
+		HB_sublineTotal++;
+		return "0";
+	}
 	FB_object.DB_SoftIndex = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal);
-	nameTemp = jsonSplit(splitValue, lines, 0, HB_Split);
+	nameTemp = jsonSplit(splitValue, lines, 0, HB_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
 	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
-	if(FB_object.DB_SoftName == "") return 0;
+	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
+		HB_sublineTotal++;
+		return "0";
+	}
 	FB_object.DB_DevName = "Not Dev";
-	FB_object.DB_Currency = jsonSplit(splitValue, lines, 3, HB_Split);
 	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
-	FB_object.DB_ProductAddress = "https://www.humblebundle.com/store/" + jsonSplit(splitValue, lines, 7, HB_Split);
+	appidArray = jsonSplit(splitValue, lines, 7, HB_Split, nowLineCount);
+	FB_object.DB_SoftID = "humblebundle/apps/" + appidArray;
+	FB_object.DB_ProductAddress = "https://www.humblebundle.com/store/" + appidArray;
 	FB_object.DB_Platform = "HumbleBundle";
-	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 9, HB_Split) + '.jpg';
-	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
-	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 10, HB_Split) + '.jpg';
+	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 9, HB_Split, nowLineCount) + '.jpg';
 	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
+	pictureTemp = 'https://hb.imgix.net/' + jsonSplit(splitValue, lines, 10, HB_Split, nowLineCount) + '.jpg';
+	FB_object.DB_BigPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	return JSON.stringify(FB_object, null, 5);
 }
 //https://store.steampowered.com/search/results/?query&start=0&count=50&dynamic_data=&sort_by=Reviews_DESC&specials=1&filter=topsellers&infinite=1
@@ -134,7 +152,7 @@ async function steamWeb(pageCount) {
 		waitUntil: 'networkidle0'
 	});
 	html = await S_page.content();
-	await S_page.waitForTimeout(500 + (Math.floor(Math.random() * 1500)));
+	await S_page.waitForTimeout(randTimeDefault + (Math.floor(Math.random() * randTimeAdd)));
 	html = html.replace(/(?:\\[rnt]|[\r\n\t])/g, "").replace(/\s\s+/g, ' ');
 	html = html.replace(/&lt;\\/g, "<").replace(/&lt;/g, "<").replace(/&gt;\\/g, ">").replace(/&gt;/g, ">");
 	html = html.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
@@ -146,6 +164,7 @@ async function steamWeb(pageCount) {
 }
 
 function steamDB(splitValue, lines) {
+	nowLineCount = S_lineTotal - S_sublineTotal;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -162,27 +181,30 @@ function steamDB(splitValue, lines) {
 		DB_SmallPicture: "Non-SmallPicture"
 	}
 	try {
-		priceTemp = jsonSplit(splitValue, lines, 4, S_Split);;
+		priceTemp = jsonSplit(splitValue, lines, 4, S_Split, nowLineCount);
 		FB_object.DB_RegCost = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
 	} catch(error) {}
 	try {
-		priceTemp = jsonSplit(splitValue, lines, 5, S_Split);;
+		priceTemp = jsonSplit(splitValue, lines, 5, S_Split, nowLineCount);
 		FB_object.DB_DisCost = parseInt(100 * parseFloat(priceTemp.replace(/₩/g, "").replace(/ /g, "").replace(/,/g, "")));
 	} catch(error) {
 		S_sublineTotal++;
 		return "0";
 	}
-	nameTemp = jsonSplit(splitValue, lines, 0, S_Split);
+	nameTemp = jsonSplit(splitValue, lines, 0, S_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "");
 	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
-	if(FB_object.DB_SoftName == "") return 0;
+	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
+		S_sublineTotal++;
+		return "0";//아니면 0
+	}
 	FB_object.DB_DevName = "Not Dev";
 	FB_object.DB_Currency = "KRW";
 	FB_object.DB_DisRate = !FB_object.DB_RegCost && !FB_object.DB_DisCost ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
-	FB_object.DB_ProductAddress = "https://store.steampowered.com/" + jsonSplit(splitValue, lines, 7, S_Split);
+	FB_object.DB_ProductAddress = "https://store.steampowered.com/" + jsonSplit(splitValue, lines, 7, S_Split, nowLineCount);
 	FB_object.DB_Platform = "Steam";
-	appidTemp = jsonSplit(splitValue, lines, 9, S_Split);
+	appidTemp = jsonSplit(splitValue, lines, 9, S_Split, nowLineCount);
 	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/capsule_231x87.jpg';
 	FB_object.DB_SmallPicture = pictureTemp.indexOf("&amp;") == -1 ? pictureTemp : pictureTemp.replace(/&amp;/g, "&");
 	pictureTemp = 'https://cdn.cloudflare.steamstatic.com/steam/' + appidTemp + '/header.jpg';
@@ -204,6 +226,7 @@ async function scrapingMain() {
 		console.log("데이터베이스 파일 만들기: " + error);
 	});
 	console.log('크롤링 시작...');
+	console.log('스팀 크롤링 중...');
 	for(let i = 0; i < S_pageNum ; i++) {
 		S_splitValue = await steamWeb(i);
 		for(let j = 1; j < steamRepeat + 1; j++) {
@@ -211,10 +234,12 @@ async function scrapingMain() {
 			S_dbTemp = steamDB(S_splitValue, j, S_pageNum);
 			(S_lineTotal != (S_pageNum * steamRepeat) - 1) && (S_dbTemp != "0") ? fileOutput += (S_dbTemp + ","): fileOutput += "";
 		}
-	}/*
+	}
+	console.log('스팀 크롤링 완료.');
+	console.log('험블번들 크롤링 중...');
 	let HB_splitValue = [];
 	let HB_dbTemp = '';
-	let HB_pageNum = 50;
+	let HB_pageNum = 50;//횟수
 	for(let i = 0; i < HB_pageNum; i++) {
 		HB_splitValue = await humblebundleWeb(i);
 		for(let j = 1; j < HB_splitValue.length; j++) {
@@ -222,8 +247,8 @@ async function scrapingMain() {
 			HB_dbTemp = humblebundleDB(HB_splitValue, j, HB_pageNum);
 			(HB_lineTotal != (HB_pageNum * humblebundleRepeat) - 1) && (HB_dbTemp != "0") ? fileOutput += (HB_dbTemp + ","): fileOutput += "";
 		}
-	}*/
-
+	}
+	console.log('험블번들 크롤링 완료.');
 	console.log('크롤링 종료');
 	if(fileOutput.slice(-1) == ",") {
 		fileOutput = fileOutput.slice(0, -1);
@@ -263,23 +288,24 @@ const jsonBackup = async(jsonName) => {
 	}
 };
 
-const deleteEmptyMessages = async () => {
+const deleteEmptyMessages = async (deletePlatform) => {
 	const postsRef = dbFBI.collection('ScrapingDB');
-	const query = postsRef.where("DB_Platform", "==", "Steam").get()
-    .then(snapshot => {   
+	const query = postsRef.where("DB_Platform", "==", deletePlatform).get()
+    .then(snapshot => {
       snapshot.forEach(doc => {
-        console.log(doc.id, '=>', doc.data());
+        //console.log(doc.id, '=>', doc.data());
         const deleteDoc = dbFBI.collection('ScrapingDB').doc(doc.id).delete();
       });
     })
     .catch(err => {
-      console.log('Error getting documents', err);
+      console.log('Error getting Steam documents', err);
     });
   };
 
 async function WebScraper() { //24시간 반복 기능 삭제
-	await deleteEmptyMessages();
-	await jsonBackup("DBbackup.json");
+	await deleteEmptyMessages("Steam");
+	await deleteEmptyMessages("HumbleBundle");
+	//await jsonBackup("DBbackup.json");
 	await scrapingMain();
 	await jsonToFirestore("DBresult.json");
 	console.log("크롤링 및 파이어베이스 업로드 종료");
