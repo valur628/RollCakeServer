@@ -105,8 +105,6 @@ function isEmpty(emptyNum) {
 
 //https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22allowCountries%22:%22KR%22,%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%22,%22count%22:40,%22country%22:%22KR%22,%22effectiveDate%22:%22[,2021-10-11T14:59:59.999Z]%22,%22keywords%22:%22%22,%22locale%22:%22ko%22,%22onSale%22:true,%22sortBy%22:%22currentPrice%22,%22sortDir%22:%22ASC%22,%22start%22:0,%22tag%22:%22%22,%22withPrice%22:true%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22f45c217481a66dd17324fbb288509bac7a2d81762e72518cb9d448a0aec43350%22%7D%7D
 
-
-
 //https://store.steampowered.com/search/results/?query&start=0&count=50&dynamic_data=&sort_by=Reviews_DESC&specials=1&filter=topsellers&infinite=1
 async function steamWeb(pageCount) {
 	let splitValue = ["abcdefgh"];
