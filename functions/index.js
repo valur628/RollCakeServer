@@ -53,9 +53,10 @@ let GOG_Split = [
 ]
 
 let randTimeDefault = 1000;
-let randTimeAdd = 5000;
+let randTimeAdd = 3000;
 
 let html;
+let globalOtherDBCount = 1;
 let S_lineTotal = 0;
 let S_sublineTotal = 0;
 let HB_lineTotal = 0;
@@ -95,7 +96,16 @@ function isEmpty(emptyNum) {
     }
   }
 
+  function localDB(jsonData) {
+		fs.readFile(jsonData, 'utf-8', function(error, data) {
+			console.log("데이터베이스 파일 만들기: " + error);
+			return data;
+		});
+	}
+
 //https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22allowCountries%22:%22KR%22,%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%22,%22count%22:40,%22country%22:%22KR%22,%22effectiveDate%22:%22[,2021-10-11T14:59:59.999Z]%22,%22keywords%22:%22%22,%22locale%22:%22ko%22,%22onSale%22:true,%22sortBy%22:%22currentPrice%22,%22sortDir%22:%22ASC%22,%22start%22:0,%22tag%22:%22%22,%22withPrice%22:true%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22f45c217481a66dd17324fbb288509bac7a2d81762e72518cb9d448a0aec43350%22%7D%7D
+
+
 
 //https://store.steampowered.com/search/results/?query&start=0&count=50&dynamic_data=&sort_by=Reviews_DESC&specials=1&filter=topsellers&infinite=1
 async function steamWeb(pageCount) {
@@ -121,7 +131,7 @@ async function steamWeb(pageCount) {
 }
 
 function steamDB(splitValue, lines) {
-	nowLineCount = S_lineTotal - S_sublineTotal;
+	nowLineCount = S_lineTotal - S_sublineTotal + globalOtherDBCount;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -203,7 +213,7 @@ async function humblebundleWeb(pageCount) {
 }
 
 function humblebundleDB(splitValue, lines) {
-	nowLineCount = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal);
+	nowLineCount = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal) + globalOtherDBCount;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -273,7 +283,7 @@ async function GOGWeb(pageCount) {
 }
 
 function GOGDB(splitValue, lines) {
-	nowLineCount = GOG_lineTotal - GOG_sublineTotal + (HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal));
+	nowLineCount = GOG_lineTotal - GOG_sublineTotal + (HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal)) + globalOtherDBCount;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -334,6 +344,7 @@ async function scrapingMain() {
 	fs.writeFile('DBresult.json', '{"ScrapingDB": [', 'utf8', function(error) {
 		console.log("데이터베이스 파일 만들기: " + error);
 	});
+	fileOutput += localDB('otherDB.json');
 	console.log('크롤링 시작...');
 	console.log('스팀 크롤링 중...');
 	for(let i = 0; i < S_pageNum ; i++) {

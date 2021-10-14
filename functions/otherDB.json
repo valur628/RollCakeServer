@@ -1,0 +1,15 @@
+{
+    "DB_SoftIndex": 0,
+    "DB_SoftID": "other/apps/1",
+    "DB_SoftName": "Creative Cloud(학생 및 교사용)",
+    "DB_DevName": "Adobe",
+    "DB_UpdateTime": "2021-10-14T06:17:25.539Z",
+    "DB_Currency": "KRW",
+    "DB_RegCost": 6200000,
+    "DB_DisCost": 2310000,
+    "DB_DisRate": 6000,
+    "DB_ProductAddress": "https://www.adobe.com/kr/creativecloud/buy/students.html?sdid=61PM7YTG&mv=other",
+    "DB_Platform": "Other",
+    "DB_BigPicture": "https://helpx.adobe.com/content/dam/help/en/qe/test-docs/pris-test/TEST-TEST-download-install-jan-2/jcr_content/main-pars/multi_column_2055578/col-33-33-33-c3/image/artboard_1_copy_28final-tiles.png.img.png",
+    "DB_SmallPicture": "https://helpx.adobe.com/content/dam/help/en/qe/test-docs/pris-test/TEST-TEST-download-install-jan-2/jcr_content/main-pars/multi_column_2055578/col-33-33-33-c3/image/artboard_1_copy_28final-tiles.png.img.png"
+},
