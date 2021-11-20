@@ -56,7 +56,8 @@ let randTimeDefault = 2000;
 let randTimeAdd = 5000;
 
 let html;
-let globalOtherDBCount = 1; //추가 SW 개수
+let nowLineCount = 0;
+let nowTempCount = 1; //추가 SW 개수
 let swS_lineTotal = 0;
 let swS_sublineTotal = 0;
 let swHB_lineTotal = 0;
@@ -88,7 +89,7 @@ function jsonSplit(splitValue, lines, SplitNum, DB_Split, lineCount) {
 	return((splitValue[lines].split(DB_Split[SplitNum][0])[1].toString()).split(DB_Split[SplitNum][1])[0].toString());
 	} catch(error) {
 	if(error != "TypeError: Cannot read property 'split' of undefined")
-		console.log('jsonSplit 에러: ' + lineCount + ' = ' + error);
+		//console.log('jsonSplit 에러: ' + lineCount + ' = ' + error);
 	return "ERROR";
 	}
 }
@@ -126,7 +127,6 @@ async function sw_steamWeb(pageCount) {
 }
 
 function sw_steamDB(splitValue, lines) {
-	nowLineCount = swS_lineTotal - swS_sublineTotal + globalOtherDBCount;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -161,12 +161,13 @@ function sw_steamDB(splitValue, lines) {
 	nameTemp = jsonSplit(splitValue, lines, 0, S_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "");
-	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	nameTemp = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	FB_object.DB_SoftName = nameTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
 		swS_sublineTotal++;
 		return "0";//아니면 0
 	}
-	FB_object.DB_DevName = "Not Dev";
+	FB_object.DB_DevName = " ";
 	FB_object.DB_Currency = "KRW";
 	FB_object.DB_DisRate = !FB_object.DB_RegCost && !FB_object.DB_DisCost ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	if(FB_object.DB_DisRate == 0 | isEmpty(FB_object.DB_DisRate) == true) {
@@ -208,7 +209,6 @@ async function sw_humblebundleWeb(pageCount) {
 }
 
 function sw_humblebundleDB(splitValue, lines) {
-	nowLineCount = swHB_lineTotal - swHB_sublineTotal + swS_lineTotal - swS_sublineTotal + globalOtherDBCount;
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -240,12 +240,13 @@ function sw_humblebundleDB(splitValue, lines) {
 	nameTemp = jsonSplit(splitValue, lines, 0, HB_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
-	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
+	nameTemp = nameTemp.replace(/\\u/g, "");
+	FB_object.DB_SoftName = nameTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
 		swHB_sublineTotal++;
 		return "0";
 	}
-	FB_object.DB_DevName = "Not Dev";
+	FB_object.DB_DevName = " ";
 	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	appidArray = jsonSplit(splitValue, lines, 7, HB_Split, nowLineCount);
 	FB_object.DB_SoftID = "humblebundle/apps/" + appidArray;
@@ -274,7 +275,7 @@ async function steamWeb(pageCount) {
 	html = html.replace(/(?:\\[rnt]|[\r\n\t])/g, "").replace(/\s\s+/g, ' ');
 	html = html.replace(/&lt;\\/g, "<").replace(/&lt;/g, "<").replace(/&gt;\\/g, ">").replace(/&gt;/g, ">");
 	html = html.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-	html = html.replace(/\\\//g, "/").replace(/\\\"/g, '"').replace(/ ₩/g, "₩");
+	html = html.replace(/\\\//g, "/").replace(/\\\"/g, '"').replace(/ ₩/g, "₩");0
 	splitValue = html.split('<a href="');
 	await S_page.close();
 	await S_browser.close();
@@ -282,7 +283,6 @@ async function steamWeb(pageCount) {
 }
 
 function steamDB(splitValue, lines) {
-	nowLineCount = S_lineTotal - S_sublineTotal + (swHB_lineTotal - swHB_sublineTotal + swS_lineTotal - swS_sublineTotal + globalOtherDBCount);
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -317,12 +317,13 @@ function steamDB(splitValue, lines) {
 	nameTemp = jsonSplit(splitValue, lines, 0, S_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "");
-	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	nameTemp = nameTemp.replace(/\\u/g, "").replace(/\\u00a0/g, " ");
+	FB_object.DB_SoftName = nameTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
 		S_sublineTotal++;
 		return "0";//아니면 0
 	}
-	FB_object.DB_DevName = "Not Dev";
+	FB_object.DB_DevName = " ";
 	FB_object.DB_Currency = "KRW";
 	FB_object.DB_DisRate = !FB_object.DB_RegCost && !FB_object.DB_DisCost ? 0 : parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	if(FB_object.DB_DisRate == 0 | isEmpty(FB_object.DB_DisRate) == true) {
@@ -364,7 +365,6 @@ async function humblebundleWeb(pageCount) {
 }
 
 function humblebundleDB(splitValue, lines) {
-	nowLineCount = HB_lineTotal - HB_sublineTotal + (S_lineTotal - S_sublineTotal) + (swHB_lineTotal - swHB_sublineTotal + swS_lineTotal - swS_sublineTotal + globalOtherDBCount);
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -396,12 +396,13 @@ function humblebundleDB(splitValue, lines) {
 	nameTemp = jsonSplit(splitValue, lines, 0, HB_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
-	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
+	nameTemp = nameTemp.replace(/\\u/g, "");
+	FB_object.DB_SoftName = nameTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
 		HB_sublineTotal++;
 		return "0";
 	}
-	FB_object.DB_DevName = "Not Dev";
+	FB_object.DB_DevName = " ";
 	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	appidArray = jsonSplit(splitValue, lines, 7, HB_Split, nowLineCount);
 	FB_object.DB_SoftID = "humblebundle/apps/" + appidArray;
@@ -434,7 +435,6 @@ async function GOGWeb(pageCount) {
 }
 
 function GOGDB(splitValue, lines) {
-	nowLineCount = GOG_lineTotal - GOG_sublineTotal + (HB_lineTotal - HB_sublineTotal + S_lineTotal - S_sublineTotal) +  + (swHB_lineTotal - swHB_sublineTotal + swS_lineTotal - swS_sublineTotal + globalOtherDBCount);
 	let FB_object = {
 		DB_SoftIndex: 0,
 		DB_SoftID: "Non-Platform_Non-ID",
@@ -466,7 +466,9 @@ function GOGDB(splitValue, lines) {
 	nameTemp = jsonSplit(splitValue, lines, 0, GOG_Split, nowLineCount);
 	nameTemp = nameTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	nameTemp = nameTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
-	FB_object.DB_SoftName = nameTemp.replace(/\\u/g, "");
+	nameTemp = nameTemp.replace(/\\u/g, "");
+	nameTemp = nameTemp.replace(/®/g, "00ae").replace(/’s/g, '2019s').replace(/™/g, "2122").replace(/'/g, "0027");
+	FB_object.DB_SoftName = nameTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	if(FB_object.DB_SoftName == "" | FB_object.DB_SoftName == "ERROR") {
 		GOG_sublineTotal++;
 		return "0";
@@ -474,7 +476,8 @@ function GOGDB(splitValue, lines) {
 	devTemp = jsonSplit(splitValue, lines, 2, GOG_Split, nowLineCount);
 	devTemp = devTemp.replace(/&amp;/g, "&").replace(/&2122/g, "");
 	devTemp = devTemp.replace(/^[\s\u00a0\u3000]+|[\s\u00a0\u3000]+$/g, "").replace(/\\u00a0/g, " ");
-	FB_object.DB_DevName = devTemp.replace(/\\u/g, "");
+	devTemp = devTemp.replace(/\\u/g, "");
+	FB_object.DB_DevName = devTemp.replace(/00ae/g, "\u00AE").replace(/2019s/g, '\u2019s').replace(/2122/g, "\u2122").replace(/0027/g, "\u0027").replace(/0026/g, "\u0026").replace(/00db/g, "\u00db").replace(/00f6/g, "\u00f6").replace(/0022/g, "\u0022").replace(/00fb/g, "\u00fb").replace(/00fc/g, "\u00fc");
 	FB_object.DB_DisRate = parseInt(100 * parseFloat(100 - (Math.round(((parseInt(FB_object.DB_DisCost) / parseInt(FB_object.DB_RegCost)) * 100) * 10) / 10)));
 	appidArray = jsonSplit(splitValue, lines, 7, GOG_Split, nowLineCount);
 	FB_object.DB_SoftID = "gog/apps/" + appidArray;
@@ -499,15 +502,17 @@ async function scrapingMain() {
 	console.log('스팀 SW 크롤링 중...');
 	let swS_splitValue = [];
 	let swS_dbTemp = '';
-	let swS_pageNum = parseInt(1000 / steamRepeat);//횟수
+	let swS_pageNum = parseInt(1500 / steamRepeat);//횟수
 	for(let i = 0; i < swS_pageNum ; i++) {
 		swS_splitValue = await sw_steamWeb(i);
 		for(let j = 1; j < steamRepeat + 1; j++) {
 			swS_lineTotal = (j + (i * steamRepeat) - 1);
+			nowLineCount = swS_lineTotal - swS_sublineTotal + nowTempCount;
 			swS_dbTemp = sw_steamDB(swS_splitValue, j, swS_pageNum);
 			(swS_lineTotal != (swS_pageNum * steamRepeat) - 1) && (swS_dbTemp != "0") ? fileOutput += (swS_dbTemp + ","): fileOutput += "";
 		}
 	}
+	nowTempCount = nowLineCount;
 	console.log('스팀 SW 크롤링 완료.');
 	console.log('험블번들 SW 크롤링 중...');
 	let swHB_splitValue = [];
@@ -517,50 +522,58 @@ async function scrapingMain() {
 		swHB_splitValue = await sw_humblebundleWeb(i);
 		for(let j = 1; j < swHB_splitValue.length; j++) {
 			swHB_lineTotal = (j + (i * humblebundleRepeat) - 1);
+			nowLineCount = swHB_lineTotal - swHB_sublineTotal + nowTempCount;
 			swHB_dbTemp = sw_humblebundleDB(swHB_splitValue, j, swHB_pageNum);
 			(swHB_lineTotal != (swHB_pageNum * humblebundleRepeat) - 1) && (swHB_dbTemp != "0") ? fileOutput += (swHB_dbTemp + ","): fileOutput += "";
 		}
 	}
+	nowTempCount = nowLineCount;
 	console.log('험블번들 SW 크롤링 완료.');
-	console.log('스팀 크롤링 중...');
-	let S_splitValue = [];
-	let S_dbTemp = '';
-	let S_pageNum = parseInt(1000 / steamRepeat);//횟수
-	for(let i = 0; i < S_pageNum ; i++) {
-		S_splitValue = await steamWeb(i);
-		for(let j = 1; j < steamRepeat + 1; j++) {
-			S_lineTotal = (j + (i * steamRepeat) - 1);
-			S_dbTemp = steamDB(S_splitValue, j, S_pageNum);
-			(S_lineTotal != (S_pageNum * steamRepeat) - 1) && (S_dbTemp != "0") ? fileOutput += (S_dbTemp + ","): fileOutput += "";
-		}
-	}
-	console.log('스팀 크롤링 완료.');
-	console.log('험블번들 크롤링 중...');
-	let HB_splitValue = [];
-	let HB_dbTemp = '';
-	let HB_pageNum = 50;//횟수
-	for(let i = 0; i < HB_pageNum; i++) {
-		HB_splitValue = await humblebundleWeb(i);
-		for(let j = 1; j < HB_splitValue.length; j++) {
-			HB_lineTotal = (j + (i * humblebundleRepeat) - 1);
-			HB_dbTemp = humblebundleDB(HB_splitValue, j, HB_pageNum);
-			(HB_lineTotal != (HB_pageNum * humblebundleRepeat) - 1) && (HB_dbTemp != "0") ? fileOutput += (HB_dbTemp + ","): fileOutput += "";
-		}
-	}
-	console.log('험블번들 크롤링 완료.');
 	console.log('GOG 크롤링 중...');
 	let GOG_splitValue = [];
 	let GOG_dbTemp = '';
-	let GOG_pageNum = 3;//횟수
+	let GOG_pageNum = 10;//횟수
 	for(let i = 0; i < GOG_pageNum; i++) {
 		GOG_splitValue = await GOGWeb(i);
 		for(let j = 1; j < GOG_splitValue.length; j++) {
 			GOG_lineTotal = (j + (i * gogRepeat) - 1);
+			nowLineCount = GOG_lineTotal - GOG_sublineTotal + nowTempCount;
 			GOG_dbTemp = GOGDB(GOG_splitValue, j, GOG_pageNum);
 			(GOG_lineTotal != (GOG_pageNum * gogRepeat) - 1) && (GOG_dbTemp != "0") ? fileOutput += (GOG_dbTemp + ","): fileOutput += "";
 		}
 	}
+	nowTempCount = nowLineCount;
 	console.log('GOG 크롤링 완료.');
+	console.log('스팀 크롤링 중...');
+	let S_splitValue = [];
+	let S_dbTemp = '';
+	let S_pageNum = parseInt(300 / steamRepeat);//횟수 1000
+	for(let i = 0; i < S_pageNum ; i++) {
+		S_splitValue = await steamWeb(i);
+		for(let j = 1; j < steamRepeat + 1; j++) {
+			S_lineTotal = (j + (i * steamRepeat) - 1);
+			nowLineCount = S_lineTotal - S_sublineTotal + nowTempCount;
+			S_dbTemp = steamDB(S_splitValue, j, S_pageNum);
+			(S_lineTotal != (S_pageNum * steamRepeat) - 1) && (S_dbTemp != "0") ? fileOutput += (S_dbTemp + ","): fileOutput += "";
+		}
+	}
+	nowTempCount = nowLineCount;
+	console.log('스팀 크롤링 완료.');
+	console.log('험블번들 크롤링 중...');
+	let HB_splitValue = [];
+	let HB_dbTemp = '';
+	let HB_pageNum = 15;//횟수 50
+	for(let i = 0; i < HB_pageNum; i++) {
+		HB_splitValue = await humblebundleWeb(i);
+		for(let j = 1; j < HB_splitValue.length; j++) {
+			HB_lineTotal = (j + (i * humblebundleRepeat) - 1);
+			nowLineCount = HB_lineTotal - HB_sublineTotal + nowTempCount;
+			HB_dbTemp = humblebundleDB(HB_splitValue, j, HB_pageNum);
+			(HB_lineTotal != (HB_pageNum * humblebundleRepeat) - 1) && (HB_dbTemp != "0") ? fileOutput += (HB_dbTemp + ","): fileOutput += "";
+		}
+	}
+	nowTempCount = nowLineCount;
+	console.log('험블번들 크롤링 완료.');
 	console.log('크롤링 종료');
 	if(fileOutput.slice(-1) == ",") {
 		fileOutput = fileOutput.slice(0, -1);
@@ -622,6 +635,7 @@ async function WebScraper() { //24시간 반복 기능 삭제
 	//await jsonBackup("DBbackup.json");
 	await scrapingMain();
 	await jsonToFirestore("DBresult.json");
+	console.log(nowTempCount + "개 가량의 핫딜 상품 확보");
 	console.log("크롤링 및 파이어베이스 업로드 종료");
 }
 
