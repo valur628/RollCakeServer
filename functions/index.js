@@ -52,8 +52,8 @@ let GOG_Split = [
 	['"image":"\\/\\/', '"']
 ]
 
-let randTimeDefault = 2000;
-let randTimeAdd = 5000;
+let randTimeDefault = 2500;
+let randTimeAdd = 5500;
 
 let html;
 let nowLineCount = 0;
