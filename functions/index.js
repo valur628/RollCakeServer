@@ -52,8 +52,8 @@ let GOG_Split = [
 	['"image":"\\/\\/', '"']
 ]
 
-let randTimeDefault = 2500;
-let randTimeAdd = 5500;
+let randTimeDefault = 5000;
+let randTimeAdd = 10000;
 
 let html;
 let nowLineCount = 0;
@@ -502,7 +502,7 @@ async function scrapingMain() {
 	console.log('스팀 SW 크롤링 중...');
 	let swS_splitValue = [];
 	let swS_dbTemp = '';
-	let swS_pageNum = parseInt(1500 / steamRepeat);//횟수
+	let swS_pageNum = parseInt(2500 / steamRepeat);//횟수
 	for(let i = 0; i < swS_pageNum ; i++) {
 		swS_splitValue = await sw_steamWeb(i);
 		for(let j = 1; j < steamRepeat + 1; j++) {
@@ -517,7 +517,7 @@ async function scrapingMain() {
 	console.log('험블번들 SW 크롤링 중...');
 	let swHB_splitValue = [];
 	let swHB_dbTemp = '';
-	let swHB_pageNum = 5;//횟수
+	let swHB_pageNum = 10;//횟수
 	for(let i = 0; i < swHB_pageNum; i++) {
 		swHB_splitValue = await sw_humblebundleWeb(i);
 		for(let j = 1; j < swHB_splitValue.length; j++) {
@@ -532,7 +532,7 @@ async function scrapingMain() {
 	console.log('GOG 크롤링 중...');
 	let GOG_splitValue = [];
 	let GOG_dbTemp = '';
-	let GOG_pageNum = 10;//횟수
+	let GOG_pageNum = 20;//횟수
 	for(let i = 0; i < GOG_pageNum; i++) {
 		GOG_splitValue = await GOGWeb(i);
 		for(let j = 1; j < GOG_splitValue.length; j++) {
@@ -547,7 +547,7 @@ async function scrapingMain() {
 	console.log('스팀 크롤링 중...');
 	let S_splitValue = [];
 	let S_dbTemp = '';
-	let S_pageNum = parseInt(300 / steamRepeat);//횟수 1000
+	let S_pageNum = parseInt(500 / steamRepeat);//횟수
 	for(let i = 0; i < S_pageNum ; i++) {
 		S_splitValue = await steamWeb(i);
 		for(let j = 1; j < steamRepeat + 1; j++) {
@@ -562,7 +562,7 @@ async function scrapingMain() {
 	console.log('험블번들 크롤링 중...');
 	let HB_splitValue = [];
 	let HB_dbTemp = '';
-	let HB_pageNum = 15;//횟수 50
+	let HB_pageNum = 30;//횟수
 	for(let i = 0; i < HB_pageNum; i++) {
 		HB_splitValue = await humblebundleWeb(i);
 		for(let j = 1; j < HB_splitValue.length; j++) {
