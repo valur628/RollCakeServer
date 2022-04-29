@@ -1,4 +1,4 @@
-# RollCakeProject
+# RollCakeServer
 ### _롤케이크 프로젝트_
 
 경상대 박주철, 경상대 황승현
